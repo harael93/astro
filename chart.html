@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Astro Chart Generator</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f5fa; margin: 0; padding: 0; }
+    .container { max-width: 400px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #ccc; padding: 32px; }
+    h1 { text-align: center; color: #3a3a6c; }
+    label { display: block; margin-top: 16px; color: #333; }
+    input, button { width: 100%; padding: 8px; margin-top: 8px; border-radius: 4px; border: 1px solid #ccc; }
+    button { background: #3a3a6c; color: #fff; font-weight: bold; cursor: pointer; margin-top: 24px; }
+    .result { margin-top: 32px; background: #f0f0ff; padding: 16px; border-radius: 6px; }
+    .error { color: #c00; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Astro Chart Generator</h1>
+    <form id="chartForm">
+      <label for="birth_date">Birth Date</label>
+      <input type="date" id="birth_date" name="birth_date" required>
+      <label for="birth_time">Birth Time</label>
+      <input type="time" id="birth_time" name="birth_time" required>
+      <label for="latitude">Latitude</label>
+      <input type="number" id="latitude" name="latitude" step="0.0001" required>
+      <label for="longitude">Longitude</label>
+      <input type="number" id="longitude" name="longitude" step="0.0001" required>
+      <button type="submit">Get Chart</button>
+    </form>
+    <div class="result" id="result" style="display:none;"></div>
+    <div class="error" id="error" style="display:none;"></div>
+  </div>
+  <script>
+    document.getElementById('chartForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      document.getElementById('result').style.display = 'none';
+      document.getElementById('error').style.display = 'none';
+      const birth_date = document.getElementById('birth_date').value;
+      const birth_time = document.getElementById('birth_time').value;
+      const latitude = parseFloat(document.getElementById('latitude').value);
+      const longitude = parseFloat(document.getElementById('longitude').value);
+      const payload = { birth_date, birth_time, latitude, longitude };
+      try {
+        const res = await fetch('http://127.0.0.1:8000/chart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('Server error');
+        const data = await res.json();
+        let html = '<h3>Chart Data</h3>';
+        html += '<b>Moon Phase:</b> ' + data.moon_phase + '<br><br>';
+        html += '<b>Positions:</b><ul>';
+        for (const planet in data.positions) {
+          const pos = data.positions[planet];
+          if (pos && typeof pos.ra !== 'undefined' && typeof pos.dec !== 'undefined' && typeof pos.distance !== 'undefined') {
+            html += `<li><b>${planet}</b>: RA=${Number(pos.ra).toFixed(2)}, Dec=${Number(pos.dec).toFixed(2)}, Dist=${Number(pos.distance).toFixed(2)}</li>`;
+          } else {
+            html += `<li><b>${planet}</b>: Data not available</li>`;
+          }
+        }
+        }
+        html += '</ul>';
+        document.getElementById('result').innerHTML = html;
+        document.getElementById('result').style.display = 'block';
+      } catch (err) {
+        document.getElementById('error').textContent = 'Error: ' + err.message;
+        document.getElementById('error').style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
