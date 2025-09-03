@@ -1,0 +1,22 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run Gunicorn on port 8080",
+			"type": "shell",
+			"command": "/var/www/html/astro/.venv/bin/gunicorn",
+			"args": [
+				"-w",
+				"4",
+				"-k",
+				"uvicorn.workers.UvicornWorker",
+				"-b",
+				"0.0.0.0:8080",
+				"gunicorn_app:app"
+			],
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}

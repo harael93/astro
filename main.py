@@ -125,4 +125,4 @@ def get_transits(request: TransitRequest):
                     "chart1_ra": pos1[planet],
                     "chart2_ra": pos2[planet]
                 })
-    return {"transits": transits}
+    return {"transits": transits} 

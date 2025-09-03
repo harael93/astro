@@ -1,0 +1,14 @@
+[Unit]
+Description=Gunicorn instance to serve FastAPI astro app
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/html/astro
+Environment="PATH=/var/www/html/astro/.venv/bin"
+ExecStart=/var/www/html/astro/.venv/bin/gunicorn -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8080 gunicorn_app:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
